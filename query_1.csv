@@ -1,0 +1,19 @@
+SELECT forecast_id
+    , weather_state_name
+    , weather_state_abbr
+    , wind_direction_compass
+    , max(created) as created
+    , applicable_date
+    , min_temp
+    , max_temp
+    , the_temp
+    , wind_speed
+    , wind_direction
+    , air_pressure
+    , humidity
+    , visibility
+    , predictability
+    , title
+    FROM forecasts LEFT JOIN locations on forecasts.woeid=locations.woeid
+    GROUP BY applicable_date,forecasts.woeid 
+    ORDER BY forecasts.woeid DESC,applicable_date

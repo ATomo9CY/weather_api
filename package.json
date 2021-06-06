@@ -1,0 +1,16 @@
+{
+  "name": "margera",
+  "version": "1.0.0",
+  "description": "",
+  "main": "web_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "sqlite3": "^5.0.2"
+  }
+}

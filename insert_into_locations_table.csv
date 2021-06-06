@@ -1,0 +1,11 @@
+INSERT INTO locations 
+    (title,
+        location_type,
+        woeid,
+        latt_long) 
+    VALUES
+    ('${location['title']}'
+       ,'${location['location_type']}'
+       ,${location['woeid']}
+       ,'${location['latt_long']}');
+    
