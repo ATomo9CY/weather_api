@@ -4,7 +4,7 @@ const http = require("http");
 
 const csv=require('./generate_csv');
 
-const host = 'localhost';
+const host = '0.0.0.0';
 const port = 8000;
 
 const prediction_days=7;
@@ -231,10 +231,8 @@ function prepare_send_response(sql,res){
         if (err) {
             throw err;
         }
-        let data='';
-        rows.forEach((row) => {
-            data+=JSON.stringify(row);
-        });
+
+        let data=JSON.stringify(rows);
         res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
         res.end(data);
@@ -347,7 +345,7 @@ const  requestListener =async function (req, res) {
 //starts server
 const server = http.createServer(requestListener);
 server.listen(port, host, () => {
-  console.log(`Server is running on http://${host}:${port}`);
+  console.log(`Server is running on port :${port}`);
 });
 
 //makes database and fetches all data needed
