@@ -333,11 +333,11 @@ const  requestListener =async function (req, res) {
             }
         default:
             res.writeHead(200);
-            res.end(`You can chose what operation to perform by placing any of the below at the end of the ulr
+            res.end(`You can choose what operation to perform by placing any of the below at the end of the ulr
             /latest :To list the latest forecast for each location for every day
             /avgTemp :To list the average the_temp of the last 3 forecasts for each location for every day
             /Toploc?n=value :To get the top n locations based on each available metric where value is a positive integer
-            /csv :To generate csv files containing the sql queries used`);
+            /csv :To generate csv files containing the sql queries used and table content`);
     }
 };
 

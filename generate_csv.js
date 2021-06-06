@@ -104,7 +104,28 @@ exports.generate_csv=async (db)=>{
     `;
 
     fnames[fnames.length]='query_3.csv';
-    fcontent[fcontent.length]=``;
+    fcontent[fcontent.length]=`SELECT * FROM(SELECT * FROM (SELECT * FROM forecasts ORDER BY forecast_id DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY created DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY applicable_date DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY min_temp ASC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM ( SELECT * FROM forecasts ORDER BY max_temp DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY the_temp DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY wind_speed DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY air_pressure DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY humidity DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY visibility DESC LIMIT \${n})
+    UNION ALL
+    SELECT * FROM (SELECT * FROM forecasts ORDER BY predictability DESC LIMIT \${n})) as forecasts
+    LEFT JOIN locations ON forecasts.woeid=locations.woeid`;
 
     let fl=fnames.length;
     fnames[fnames.length]='forcasts_table_content.csv';
