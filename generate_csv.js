@@ -1,9 +1,13 @@
-const fs = require("fs").promises;
+const fs = require("fs");
 
-async function writeFile(file_name,csv_content) {
+function writeFile(file_name,csv_content) {
 
     try {
-        await fs.writeFile(file_name, csv_content);
+        var dirname = './csv/';
+        if (!fs.existsSync(dirname)) {
+            fs.mkdirSync(dirname);
+        }
+        fs.writeFileSync(dirname+file_name, csv_content);
     } catch (error) {
         console.error(`Got an error trying to write a file: ${error.message}`);
         return {code:500,text:`Got an error trying to write a file: ${error.message}`};
@@ -104,11 +108,7 @@ exports.generate_csv=async (db)=>{
     `;
 
     fnames[fnames.length]='query_3.csv';
-    fcontent[fcontent.length]=`SELECT * FROM(SELECT * FROM (SELECT * FROM forecasts ORDER BY forecast_id DESC LIMIT \${n})
-    UNION ALL
-    SELECT * FROM (SELECT * FROM forecasts ORDER BY created DESC LIMIT \${n})
-    UNION ALL
-    SELECT * FROM (SELECT * FROM forecasts ORDER BY applicable_date DESC LIMIT \${n})
+    fcontent[fcontent.length]=`SELECT * FROM(SELECT * FROM (SELECT * FROM forecasts ORDER BY created DESC LIMIT \${n})
     UNION ALL
     SELECT * FROM (SELECT * FROM forecasts ORDER BY min_temp ASC LIMIT \${n})
     UNION ALL
@@ -127,23 +127,6 @@ exports.generate_csv=async (db)=>{
     SELECT * FROM (SELECT * FROM forecasts ORDER BY predictability DESC LIMIT \${n})) as forecasts
     LEFT JOIN locations ON forecasts.woeid=locations.woeid`;
 
-    let fl=fnames.length;
-    fnames[fnames.length]='forcasts_table_content.csv';
-    fcontent[fcontent.length]=`forecast_id,weather_state_name,weather_state_abbr,wind_direction_compass,created,applicable_date,min_temp,max_temp,the_temp,wind_speed,wind_direction,air_pressure,humidity,visibility,predictability,woeid`;
-
-    db.all('SELECT * FROM forecasts', (err, rows) => {
-        if (err) {
-            return {code:500,text:`error ${err.message}`};
-        }
-       
-        rows.forEach((row) => {
-            let data='';
-            for (const [key, value] of Object.entries(row)) {
-                data=data+value+',';
-            }
-            fcontent[fl]=fcontent[fl]+'\n'+data;
-        });
-    });
 
     fnames[fnames.length]='generate_locations_table_sql.csv';
     fcontent[fcontent.length]=`CREATE TABLE IF NOT EXISTS locations (
@@ -153,26 +136,6 @@ exports.generate_csv=async (db)=>{
         latt_long TEXT,
         PRIMARY KEY (woeid))
     `;
-
-
-    let ll=fnames.length;
-    fnames[fnames.length]='locations_table_content.csv';
-    fcontent[fcontent.length]=`title,location_type,woeid,latt_long`;
-
-    
-    db.all('SELECT * FROM locations',(err, rows) => {
-        if (err) {
-            return {code:500,text:`error ${err.message}`};
-        }
-       
-        rows.forEach((row) => {
-            let data='';
-            for (const [key, value] of Object.entries(row)) {
-                data=data+value+',';
-            }
-            fcontent[ll]=fcontent[ll]+'\n'+data;
-        });
-    });
     
 
     fnames[fnames.length]='insert_into_locations_table.csv';
@@ -190,7 +153,50 @@ exports.generate_csv=async (db)=>{
 
     
     for(let i=0;i<fnames.length;i++){
-       await writeFile(fnames[i],fcontent[i]);
+       writeFile(fnames[i],fcontent[i]);
     }
+
+    let fl=fnames.length;
+    fnames[fnames.length]='forcasts_table_content.csv';
+    fcontent[fcontent.length]=`forecast_id,weather_state_name,weather_state_abbr,wind_direction_compass,created,applicable_date,min_temp,max_temp,the_temp,wind_speed,wind_direction,air_pressure,humidity,visibility,predictability,woeid`;
+
+  
+    await db.all('SELECT * FROM forecasts', (err, rows) => {
+        if (err) {
+            return {code:500,text:`error ${err.message}`};
+        }
+       
+        rows.forEach((row) => {
+            let data='';
+            for (const [key, value] of Object.entries(row)) {
+                data=data+value+',';
+            }
+            fcontent[fl]=fcontent[fl]+'\n'+data;
+        });
+        writeFile(fnames[fl],fcontent[fl]);
+    });
+
+
+    let ll=fnames.length;
+    fnames[fnames.length]='locations_table_content.csv';
+    fcontent[fcontent.length]=`title,location_type,woeid,latt_long`;
+
+    
+    await db.all('SELECT * FROM locations',(err, rows) => {
+        if (err) {
+            return {code:500,text:`error ${err.message}`};
+        }
+       
+        rows.forEach((row) => {
+            let data='';
+            for (const [key, value] of Object.entries(row)) {
+                data=data+value+',';
+            }
+            fcontent[ll]=fcontent[ll]+'\n'+data;
+        });
+        writeFile(fnames[ll],fcontent[ll]);
+    });
+
+
     return {code:200,text:`files generated succesfully`};
 }

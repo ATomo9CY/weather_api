@@ -1,7 +1,0 @@
-SELECT title
-    ,applicable_date
-    , avg(the_temp)
-    FROM (SELECT title,applicable_date,the_temp,row_number() OVER (PARTITION BY forecasts.woeid,applicable_date ORDER BY created DESC) as rownum FROM forecasts LEFT JOIN locations on forecasts.woeid=locations.woeid)
-    WHERE rownum<=3 
-    GROUP BY applicable_date,title
-    

@@ -13,7 +13,7 @@ let sql;
 let db;
 //create/open database
 function db_init(){
-    //since data used have to be up to date,an in memory db is used since it resets after the program ends
+    //since data used has to be up to date,an in memory db is used since it resets after the program ends
     db = new sqlite3.Database(/*'./weather_forecasts.db'*/':memory:', (err) => {
         if (err) {
             console.error(err.message);
@@ -295,11 +295,7 @@ function avgtemp(res){
 }
 
 function toploc(n,res){
-    let sql=`SELECT * FROM(SELECT * FROM (SELECT * FROM forecasts ORDER BY forecast_id DESC LIMIT ${n})
-    UNION ALL
-    SELECT * FROM (SELECT * FROM forecasts ORDER BY created DESC LIMIT ${n})
-    UNION ALL
-    SELECT * FROM (SELECT * FROM forecasts ORDER BY applicable_date DESC LIMIT ${n})
+    let sql=`SELECT * FROM(SELECT * FROM (SELECT * FROM forecasts ORDER BY created DESC LIMIT ${n})
     UNION ALL
     SELECT * FROM (SELECT * FROM forecasts ORDER BY min_temp ASC LIMIT ${n})
     UNION ALL
@@ -377,15 +373,6 @@ server.listen(port, host, () => {
 db_init();
 
 
-
-
-
-//if email is answer implement final solution
-
-
-//setup on git?
-
-//setup on aws cloud
 
 
 

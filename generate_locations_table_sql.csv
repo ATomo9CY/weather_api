@@ -1,7 +1,0 @@
-CREATE TABLE IF NOT EXISTS locations (
-        title TEXT,
-        location_type TEXT,
-        woeid INT,
-        latt_long TEXT,
-        PRIMARY KEY (woeid))
-    
