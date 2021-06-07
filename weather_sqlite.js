@@ -63,17 +63,7 @@ function db_init(){
                 console.error(err.message);
             }
 
-            //generate data needed for queries
-            let locations=['london','berlin','moscow'];
-            let dates=[];
-            var datetime = new Date();
-            console.log(datetime);
-            for(let i=0;i<prediction_days;i++){
-                datetime.setDate(datetime.getDate()+1);
-                dates[i]=datetime.getFullYear()+'/'+(datetime.getMonth()+1)+'/'+datetime.getDate()+'/';
-            }
-
-            fill_tables(locations,dates);
+            fill_tables();
         });
     });
 }
@@ -84,8 +74,36 @@ var options = {
     path: '/api/location/44418/2021/6/10/'
 };
 
+async function empty_tables(){
+    await db.serialize(() => {
+        // queries will execute in serialized mode
+        let sql=(`DELETE FROM locations`);
+        db.run(sql, (err) => {
+            if (err) {
+                console.error(err.message);
+            }
+        });
+        sql=(`DELETE FROM forecasts`);
+        db.run(sql, (err) => {
+            if (err) {
+                console.error(err.message);
+            }
+        });
+    });
+}
 
-function fill_tables(locations,dates){
+
+function fill_tables(){
+
+    //generate data needed for queries
+    let locations=['london','berlin','moscow'];
+    let dates=[];
+    var datetime = new Date();
+    console.log(datetime);
+    for(let i=0;i<prediction_days;i++){
+        datetime.setDate(datetime.getDate()+1);
+        dates[i]=datetime.getFullYear()+'/'+(datetime.getMonth()+1)+'/'+datetime.getDate()+'/';
+    }
 
     locations.forEach(location => {
         options["path"]='/api/location/search/?query='+location;
@@ -139,13 +157,11 @@ function store_location_data(data,dates){
             if(err!=null){
                 console.error(`Encountered an error ${err.message}`);
             }
-            //location_ids[location_ids.length]=location['woeid'];
+
             dates.forEach(date => {
                 options["path"]='/api/location/'+location['woeid']+'/'+date;
                 get_forecastdata(options,location['woeid']);
             });
-
-            
         });
     });
 }
@@ -319,6 +335,13 @@ const  requestListener =async function (req, res) {
             console.log('responded /csv');
             console.log(v);
         break;
+        case '/upToDate':
+            await empty_tables();
+            fill_tables();
+            console.log('responded /upToDate');
+            res.writeHead(200);
+            res.end('database is being updated');
+        break;
         case '/latest':
             latest(res);
         break;
@@ -337,7 +360,9 @@ const  requestListener =async function (req, res) {
             /latest :To list the latest forecast for each location for every day
             /avgTemp :To list the average the_temp of the last 3 forecasts for each location for every day
             /Toploc?n=value :To get the top n locations based on each available metric where value is a positive integer
-            /csv :To generate csv files containing the sql queries used and table content`);
+            /csv :To generate csv files containing the sql queries used and table content
+            /upToDate :To update information in the database to the most recent forecasts
+            `);
     }
 };
 
